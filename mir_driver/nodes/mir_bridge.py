@@ -142,7 +142,7 @@ PUB_TOPICS = [
               TopicConfig('mir_log', Log),
               TopicConfig('mir_serial_button', Serial),
               TopicConfig('mir_sound', String),
-              TopicConfig('mir_status', MirStatus),
+              TopicConfig('robot_status', RobotStatus),
               TopicConfig('mir_status_msg', String),
 #              TopicConfig('mirspawn/node_events', LaunchItem),
               TopicConfig('mirwebapp/grid_map_metadata', LocalMapStat),
