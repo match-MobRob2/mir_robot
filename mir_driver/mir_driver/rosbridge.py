@@ -50,10 +50,10 @@ class RosbridgeSetup:
     def callService(self, serviceName, callback=None, msg=None):
         id = self.generate_id()
         call = {"op": "call_service", "id": id, "service": serviceName}
-        if msg != None:
+        if msg is not None:
             call['args'] = msg
 
-        if callback == None:
+        if callback is None:
             self.resp = None
 
             def internalCB(msg):
@@ -63,7 +63,7 @@ class RosbridgeSetup:
             self.addServiceCallback(id, internalCB)
             self.send(call)
 
-            while self.resp == None:
+            while self.resp is None:
                 time.sleep(0.01)
 
             return self.resp
