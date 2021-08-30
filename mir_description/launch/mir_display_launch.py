@@ -22,11 +22,9 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument('use_sim_time', default_value='true', description='Use simulation/Gazebo clock'),
             IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
-                    os.path.join(mir_description_dir, 'launch', 'robot_state_publisher_launch.py')
-                ),
+                PythonLaunchDescriptionSource(os.path.join(mir_description_dir, 'launch', 'mir_launch.py')),
                 launch_arguments={
-                    'joint_state_publisher_enabled': LaunchConfiguration('joint_state_publisher_enabled')
+                    'joint_state_publisher_enabled': LaunchConfiguration('joint_state_publisher_enabled'),
                 }.items(),
             ),
             Node(package='rviz2', executable='rviz2', arguments=['-d', rviz_config_file]),
