@@ -26,7 +26,7 @@ int32 MAPPING_ERROR = 10300
 int32 ODOM_FUSION_ERROR = 10400
 
 
-time timestamp		# Timestamp for when the error occurred
+builtin_interfaces/Time timestamp		# Timestamp for when the error occurred
 int32 code 			# Error code
 string description 	# Error description
 string module		# Module in which the error occurred

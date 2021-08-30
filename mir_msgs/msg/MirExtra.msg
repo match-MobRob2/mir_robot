@@ -1,5 +1,5 @@
 # MirExtra - to publish data on a topic
-Header header
+std_msgs/Header header
 float32 time_delta # Time since last encoder update.
 float32 r_rpm  # rmp speed from right encoder
 float32 l_rpm  # rmp speed from left encoder

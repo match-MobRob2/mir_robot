@@ -1,4 +1,4 @@
-time time_stamp
+builtin_interfaces/Time time_stamp
 string sound_guid
 string message
 

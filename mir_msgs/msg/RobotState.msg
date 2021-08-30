@@ -13,5 +13,5 @@ uint8 ROBOT_STATE_EMERGENCYSTOP = 10	# the robot has emg-stop activated
 uint8 ROBOT_STATE_MANUALCONTROL = 11	# a pause state, where the robot can move
 uint8 ROBOT_STATE_ERROR = 12		# a general error state, requires a error handle
 
-uint8 robotState
-string robotStateString
+uint8 robot_state
+string robot_state_string

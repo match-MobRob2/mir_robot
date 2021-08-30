@@ -5,5 +5,5 @@ uint8 ROBOT_MODE_MAPPING_FINALIZING = 4		# in mapping the recorded map is being 
 uint8 ROBOT_MODE_MISSION = 7		# primary mode when executing a mission (action list)
 uint8 ROBOT_MODE_CHANGING = 255		# a transition mode - to say that a transition is in progress
 
-uint8 robotMode
-string robotModeString
+uint8 robot_mode
+string robot_mode_string
