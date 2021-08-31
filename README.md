@@ -1,18 +1,22 @@
+mir_driver
+==========
+
+## Disclaimer
+
+**This package is intended to be a migration package of [mir_robot using
+ros1](https://github.com/dfki-ric/mir_robot) to [ros
+foxy](https://docs.ros.org/en/foxy/Installation.html).
 It is currently still under heavy development - to be used with caution!**
-This branch is still under heavy development - to be used with caution!**
 The following packages have been migrated to foxy:
 
 - [ ] mir_actions
 - [x] mir_description
-- [ ] mir_driver
+- [x] mir_driver
 - [ ] mir_dwb_critics
-- [ ] mir_gazebo
-- [ ] mir_msgs
-- [ ] mir_navigation
+- [x] mir_gazebo
+- [x] mir_msgs
+- [x] mir_navigation
 - [ ] sdc21x0
-
-mir_driver
-==========
 
 This repo contains a ROS driver and ROS configuration files (URDF description,
 Gazebo launch files, move_base config, bringup launch files, message and action
@@ -26,7 +30,7 @@ missing feature in this software, please report it on the
 Supported MiR robots and software versions
 ------------------------------------------
 
-This repo has been confirmed to work with the following robots:
+<!-- This repo has been confirmed to work with the following robots:
 
 * MiR 100
 * MiR 200
@@ -36,7 +40,7 @@ It probably also works with the MiR250 and MiR1000. If you can test it on one
 of those, please let us know if it works.
 
 The only supported software version is **MiR software 2.8.3.1**. You can try if
-it works with other versions, but this is the one that is known to work.
+it works with other versions, but this is the one that is known to work. -->
 
 
 Package overview
@@ -54,25 +58,36 @@ Package overview
 Installation
 ------------
 
+<!--
 You can chose between binary and source install below. If you don't want to
 modify the source, the binary install is preferred (if `mir_robot` binary
 packages are available for your ROS distro). The instructions below use the ROS
 distro `noetic` as an example; if you use a different distro (e.g.  `melodic`),
 replace all occurrences of the string `noetic` by your distro name in the
-instructions.
+instructions. -->
 
 ### Preliminaries
 
-If you haven't already installed ROS on your PC, you need to add the ROS apt
-repository. This step is necessary for either binary or source install.
+If you haven't already [installed
+ROS2](https://docs.ros.org/en/foxy/Installation/Ubuntu-Install-Debians.html) on
+your PC, you need to add the ROS2 apt repository. This step is necessary for
+either binary or source install.
 
 ```
-sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
-sudo apt-get update -qq
+sudo apt update && sudo apt install curl gnupg2 lsb-release
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key  -o /usr/share/keyrings/ros-archive-keyring.gpg
+sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 ```
 
-### Binary install
+Install ROS2 Binary
+
+```
+sudo apt update
+sudo apt install ros-foxy-desktop
+sudo apt-get install python3-vcstool
+```
+
+<!-- ### Binary install
 
 For a binary install, it suffices to run this command:
 
@@ -81,7 +96,7 @@ sudo apt install ros-noetic-mir-robot
 ```
 
 See the tables at the end of this README for a list of ROS distros for which
-binary packages are available.
+binary packages are available. -->
 
 ### Source install
 
@@ -89,36 +104,33 @@ For a source install, run the commands below instead of the command from the
 "binary install" section.
 
 ```bash
-# create a catkin workspace
-mkdir -p ~/catkin_ws/src
-cd ~/catkin_ws/src/
+# create a ros2 workspace
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/
 
-# clone mir_robot into the catkin workspace
-git clone -b noetic https://github.com/dfki-ric/mir_robot.git
+# clone mir_robot into the ros2 workspace
+git clone -b foxy-devel https://github.com/relffok/mir_robot src/mir_robot
+
+# use vcs to fetch linked repos
+vcs import < src/mir_robot/ros2.repos src --recursive
 
 # use rosdep to install all dependencies (including ROS itself)
-sudo apt-get update -qq
-sudo apt-get install -qq -y python-rosdep
-sudo rosdep init
+sudo apt update
+sudo apt install -y python3-rosdep
 rosdep update
-rosdep install --from-paths ./ -i -y --rosdistro noetic
+rosdep install --from-paths src --ignore-src -r -y --rosdistro foxy
 
-# build all packages in the catkin workspace
-source /opt/ros/noetic/setup.bash
-catkin_init_workspace
-cd ~/catkin_ws
-catkin_make -DCMAKE_BUILD_TYPE=RelWithDebugInfo
+# build all packages in the workspace
+source /opt/ros/foxy/setup.bash
+cd ~/ros2_ws
+colcon build
 ```
-
-In case you encounter problems, please compare the commands above to the build
-step in [`.travis.yml`](.travis.yml); that should always have the most
-recent list of commands.
 
 You should add the following line to the end of your `~/.bashrc`, and then
 close and reopen all terminals:
 
 ```bash
-source ~/catkin_ws/devel/setup.bash
+source ~/ros2_ws/install/setup.bash
 ```
 
 Gazebo demo (existing map)
