@@ -95,7 +95,7 @@ def generate_launch_description():
         parameters=[
             {
                 'laserscan_topics': "b_scan f_scan",
-                'destination_frame': "base_link",
+                'destination_frame': "virtual_laser_link",
                 'scan_destination_topic': 'scan',
                 'cloud_destination_topic': 'scan_cloud',
                 'max_completion_time': 0.05,
