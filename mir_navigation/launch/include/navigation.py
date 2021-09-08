@@ -65,9 +65,7 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 'use_sim_time', default_value='false', description='Use simulation (Gazebo) clock if true'
             ),
-            DeclareLaunchArgument(
-                'cmd_vel_topic', default_value='mobile_base_controller/cmd_vel', description='Define cmd_vel topic'
-            ),
+            DeclareLaunchArgument('cmd_vel_topic', default_value='cmd_vel', description='Define cmd_vel topic'),
             DeclareLaunchArgument(
                 'autostart', default_value='true', description='Automatically startup the nav2 stack'
             ),
