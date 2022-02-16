@@ -17,84 +17,53 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
+            DeclareLaunchArgument('namespace', default_value='', description='Namespace to push all topics into.'),
             DeclareLaunchArgument('use_sim_time', default_value='false', description=''),
             DeclareLaunchArgument('mir_hostname', default_value='192.168.12.20', description=''),
-            DeclareLaunchArgument(
-                'disable_map',
-                default_value='false',
-                description='Disable the map topic and map -> odom_comb TF transform from the MiR',
-            ),
-            DeclareLaunchArgument('rviz_enabled', default_value='false', description='Set to true to launch rviz.'),
-            DeclareLaunchArgument(
-                'rviz_config_file',
-                default_value=os.path.join(mir_description_dir, 'rviz', 'mir_visualization.rviz'),
-                description='Define rviz config file to be used.',
-            ),
-            DeclareLaunchArgument(
-                'twist_stamper_enabled', default_value='true', description='Set to true to stamp twist messages.'
-            ),
+            # DeclareLaunchArgument(
+            #     'disable_map',
+            #     default_value='false',
+            #     description='Disable the map topic and map -> odom_comb TF transform from the MiR'),
             DeclareLaunchArgument(
                 'robot_state_publisher_enabled',
                 default_value='true',
                 description='Set to true to publish tf using mir_description',
             ),
-            DeclareLaunchArgument(
-                'teleop_enabled', default_value='false', description='Set to true to manually operate the robot'
-            ),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(mir_description_dir, 'launch', 'mir_launch.py')),
-                launch_arguments={'joint_state_publisher_enabled': 'false'}.items(),
+                launch_arguments={
+                    'joint_state_publisher_enabled': 'false',
+                    'namespace': LaunchConfiguration('namespace'),
+                }.items(),
                 condition=IfCondition(LaunchConfiguration('robot_state_publisher_enabled')),
             ),
             Node(
                 package='mir_driver',
                 executable='mir_bridge',
-                parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],
+                parameters=[
+                    {'use_sim_time': LaunchConfiguration('use_sim_time'), 'tf_prefix': LaunchConfiguration('namespace')}
+                ],
+                namespace=LaunchConfiguration('namespace'),
                 output='screen',
             ),
             Node(
                 package='mir_driver',
                 executable='fake_mir_joint_publisher',
                 remappings=[('use_sim_time', LaunchConfiguration('use_sim_time'))],
-                parameters=[{'rviz_enabled': 'false'}],
+                parameters=[{'tf_prefix': LaunchConfiguration('namespace')}],
+                namespace=LaunchConfiguration('namespace'),
                 output='screen',
             ),
             Node(
-                condition=IfCondition(LaunchConfiguration('rviz_enabled')),
-                package='rviz2',
-                executable='rviz2',
-                output={'both': 'log'},
-                parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],
-                arguments=['-d', rviz_config_file],
-            ),
-            Node(
-                condition=IfCondition(LaunchConfiguration('twist_stamper_enabled')),
                 package='twist_stamper',
                 executable='twist_stamper',
-                name='twist_stamper_nav_cmd',
+                name='twist_stamper_cmd_vel_mir',
                 parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],
                 remappings=[
                     ('cmd_vel_in', 'cmd_vel'),
                     ('cmd_vel_out', 'cmd_vel_stamped'),
                 ],
-            ),
-            Node(
-                condition=IfCondition(LaunchConfiguration('teleop_enabled')),
-                package='twist_stamper',
-                executable='twist_stamper',
-                name='twist_stamper_teleop_cmd',
-                parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],
-                remappings=[
-                    ('cmd_vel_in', 'cmd_vel'),
-                    ('cmd_vel_out', 'cmd_vel_stamped'),
-                ],
-            ),
-            Node(
-                condition=IfCondition(LaunchConfiguration("teleop_enabled")),
-                package='teleop_twist_keyboard',
-                executable='teleop_twist_keyboard',
-                output='screen',
-                prefix='xterm -e',
+                namespace=LaunchConfiguration('namespace'),
             ),
             Node(
                 package='ira_laser_tools',
@@ -115,6 +84,7 @@ def generate_launch_description():
                         'best_effort': False,
                     }
                 ],
+                namespace=LaunchConfiguration('namespace'),
                 output='screen',
             ),
         ]

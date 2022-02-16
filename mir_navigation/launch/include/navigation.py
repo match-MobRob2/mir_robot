@@ -17,7 +17,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
+from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable, OpaqueFunction, SetLaunchConfiguration
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from nav2_common.launch import RewrittenYaml
@@ -27,9 +27,8 @@ def generate_launch_description():
     # Get the launch directory
     mir_nav_dir = get_package_share_directory('mir_navigation')
 
-    namespace = LaunchConfiguration('namespace')
     use_sim_time = LaunchConfiguration('use_sim_time')
-    command_topic = LaunchConfiguration('cmd_vel_topic')
+    command_topic = LaunchConfiguration('cmd_vel_w_prefix')
     autostart = LaunchConfiguration('autostart')
     params_file = LaunchConfiguration('params_file')
     default_nav_to_pose_bt_xml = LaunchConfiguration('default_nav_to_pose_bt_xml')
@@ -56,8 +55,17 @@ def generate_launch_description():
     }
 
     configured_params = RewrittenYaml(
-        source_file=params_file, root_key=namespace, param_rewrites=param_substitutions, convert_types=True
+        source_file=params_file, root_key='', param_rewrites=param_substitutions, convert_types=True
     )
+
+    def add_prefix_to_cmd_vel(context):
+        topic = context.launch_configurations['cmd_vel_topic']
+        try:
+            namespace = context.launch_configurations['namespace']
+            topic = namespace + '/' + topic
+        except KeyError:
+            pass
+        return [SetLaunchConfiguration('cmd_vel_w_prefix', topic)]
 
     return LaunchDescription(
         [
@@ -88,6 +96,7 @@ def generate_launch_description():
                 default_value='true',
                 description='Whether to set the map subscriber QoS to transient local',
             ),
+            OpaqueFunction(function=add_prefix_to_cmd_vel),
             Node(
                 package='nav2_controller',
                 executable='controller_server',

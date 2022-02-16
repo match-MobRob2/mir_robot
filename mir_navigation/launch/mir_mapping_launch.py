@@ -35,6 +35,10 @@ def generate_launch_description():
         'navigation_enabled', default_value='false', description='Use navigation for mapping'
     )
 
+    declare_namespace_arg = DeclareLaunchArgument(
+        'namespace', default_value='', description='Namespace to push all topics into.'
+    )
+
     start_driver_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(mir_driver_dir, 'launch', 'mir_launch.py')),
         launch_arguments={'rviz_config_file': LaunchConfiguration('rviz_config_file')}.items(),
@@ -56,6 +60,7 @@ def generate_launch_description():
 
     ld = LaunchDescription()
 
+    ld.add_action(declare_namespace_arg)
     ld.add_action(declare_use_sim_time_argument)
     ld.add_action(declare_nav_argument)
     ld.add_action(declare_slam_params_file_cmd)

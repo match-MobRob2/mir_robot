@@ -27,6 +27,11 @@ def generate_launch_description():
                     'joint_state_publisher_enabled': LaunchConfiguration('joint_state_publisher_enabled'),
                 }.items(),
             ),
-            Node(package='rviz2', executable='rviz2', arguments=['-d', rviz_config_file]),
+            Node(
+                package='rviz2',
+                executable='rviz2',
+                arguments=['-d', rviz_config_file],
+                parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],
+            ),
         ]
     )

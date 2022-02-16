@@ -3,7 +3,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.conditions import IfCondition
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, SetLaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
@@ -44,7 +44,7 @@ def generate_launch_description():
     )
 
     declare_verbose_arg = DeclareLaunchArgument(
-        'verbose', default_value='true', description='Set to true to enable verbose mode for Gazebo.'
+        'verbose', default_value='false', description='Set to true to enable verbose mode for Gazebo.'
     )
 
     declare_teleop_arg = DeclareLaunchArgument(
@@ -80,13 +80,26 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(mir_gazebo_dir, 'launch', 'include', 'mir_gazebo_common.py'))
     )
 
+    def process_namespace(context):
+        robot_name = "mir_robot"
+        try:
+            namespace = context.launch_configurations['namespace']
+            robot_name = namespace + '/' + robot_name
+        except KeyError:
+            pass
+        return [SetLaunchConfiguration('robot_name', robot_name)]
+
     spawn_robot = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
-        # TODO: check possibility of namespace as robot name
-        arguments=['-entity', 'mir_robot', '-topic', 'robot_description'],
+        arguments=[
+            '-entity',
+            LaunchConfiguration('robot_name'),
+            '-topic',
+            'robot_description',
+            '-b',  # bond node to gazebo model,
+        ],
         namespace=LaunchConfiguration('namespace'),
-        # TODO: add spawning position
         output='screen',
     )
 
@@ -96,6 +109,7 @@ def generate_launch_description():
         executable='rviz2',
         output={'both': 'log'},
         arguments=['-d', rviz_config_file],
+        parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],
     )
 
     launch_teleop = Node(
@@ -107,6 +121,7 @@ def generate_launch_description():
         prefix='xterm -e',
     )
 
+    ld.add_action(OpaqueFunction(function=process_namespace))
     ld.add_action(declare_namespace_arg)
     ld.add_action(declare_robot_x_arg)
     ld.add_action(declare_robot_y_arg)

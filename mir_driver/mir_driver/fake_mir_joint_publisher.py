@@ -9,9 +9,16 @@ from rclpy.qos import qos_profile_system_default
 class fake_mir_joint_publisher(Node):
     def __init__(self):
         super().__init__('fake_mir_joint_publisher')
-        prefix = self.declare_parameter('~prefix', '').value
+
+        self.declare_parameter('tf_prefix', '')
+        tf_prefix = self.get_parameter('tf_prefix').get_parameter_value().string_value.strip('/')
+        if tf_prefix != "":
+            tf_prefix = tf_prefix + '/'
+
         pub = self.create_publisher(
-            msg_type=JointState, topic='joint_states', qos_profile=qos_profile_system_default  # TODO Check QoS Settings
+            msg_type=JointState,
+            topic='joint_states',  # no prefix to joint states, just namespace
+            qos_profile=qos_profile_system_default,  # TODO Check QoS Settings
         )
 
         pub_rate = 1
@@ -20,16 +27,16 @@ class fake_mir_joint_publisher(Node):
             js = JointState()
             js.header.stamp = self.get_clock().now().to_msg()
             js.name = [
-                prefix + 'left_wheel_joint',
-                prefix + 'right_wheel_joint',
-                prefix + 'fl_caster_rotation_joint',
-                prefix + 'fl_caster_wheel_joint',
-                prefix + 'fr_caster_rotation_joint',
-                prefix + 'fr_caster_wheel_joint',
-                prefix + 'bl_caster_rotation_joint',
-                prefix + 'bl_caster_wheel_joint',
-                prefix + 'br_caster_rotation_joint',
-                prefix + 'br_caster_wheel_joint',
+                tf_prefix + 'left_wheel_joint',
+                tf_prefix + 'right_wheel_joint',
+                tf_prefix + 'fl_caster_rotation_joint',
+                tf_prefix + 'fl_caster_wheel_joint',
+                tf_prefix + 'fr_caster_rotation_joint',
+                tf_prefix + 'fr_caster_wheel_joint',
+                tf_prefix + 'bl_caster_rotation_joint',
+                tf_prefix + 'bl_caster_wheel_joint',
+                tf_prefix + 'br_caster_rotation_joint',
+                tf_prefix + 'br_caster_wheel_joint',
             ]
             js.position = [0.0 for _ in js.name]
             js.velocity = [0.0 for _ in js.name]
