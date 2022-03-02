@@ -97,8 +97,8 @@ def generate_launch_description():
             LaunchConfiguration('robot_name'),
             '-topic',
             'robot_description',
-            '-b',  # bond node to gazebo model,
-        ],
+            '-b',
+        ],  # bond node to gazebo model,
         namespace=LaunchConfiguration('namespace'),
         output='screen',
     )

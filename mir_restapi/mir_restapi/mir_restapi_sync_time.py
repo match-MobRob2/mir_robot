@@ -43,8 +43,7 @@ class MirRestAPIClient(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-
-    rest_api_client = MirRestAPIClient()
+    MirRestAPIClient()
 
 
 if __name__ == '__main__':

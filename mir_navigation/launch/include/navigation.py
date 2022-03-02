@@ -45,7 +45,8 @@ def generate_launch_description():
     remappings = [('/tf', 'tf'), ('/tf_static', 'tf_static'), ('cmd_vel', command_topic)]
 
     # Create our own temporary YAML files that include substitutions
-    # Watch out for parameters that don't exist in yaml - will not be substituted of course (default_nav_to_pose_bt_xml)
+    # Watch out for parameters that don't exist in yaml - will not be substituted of course
+    # (default_nav_to_pose_bt_xml)
     # TODO: Needs to be addressed in nav2
     param_substitutions = {
         'use_sim_time': use_sim_time,

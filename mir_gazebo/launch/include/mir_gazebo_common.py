@@ -1,7 +1,5 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.actions.set_launch_configuration import SetLaunchConfiguration
-from launch.actions import OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
@@ -32,7 +30,7 @@ def generate_launch_description():
                         'best_effort': False,
                     }
                 ],
-                namespace=LaunchConfiguration('namespace'),  # adds namespace to topic names and frames
+                namespace=namespace,  # adds namespace to topic names and frames
                 output='screen',
             ),
         ]

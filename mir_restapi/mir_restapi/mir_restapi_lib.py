@@ -20,7 +20,7 @@ class HttpConnection:
             self.connection.close()
 
     def is_valid(self):
-        return not self.connection is None
+        return self.connection is not None
 
     def get(self, path):
         if not self.is_valid():
@@ -146,7 +146,10 @@ class MirRestAPI:
                 # that's why there is no response accompanying the PUT request,
                 # therefore a time out occurs, however time has been set correctly
                 response += "Set datetime to " + dT
-                self.logger.warn("REST API: Setting time Mir triggers emergency stop, please unlock.")
+                self.logger.warn(
+                    "REST API: Setting time Mir triggers emergency stop, \
+                                  please unlock."
+                )
                 self.logger.info(response)
 
                 # this is needed, because a timeset restarts the restAPI
@@ -213,7 +216,7 @@ class MirRestAPI:
 
     def add_mission_to_queue(self, mission_name):
         mis_guid = self.get_mission_guid(mission_name)
-        if mis_guid == None:
+        if mis_guid is None:
             self.logger.warn("No Mission named '{}' available on MIR - Aborting move_to".format(mission_name))
             return False, -1
 
