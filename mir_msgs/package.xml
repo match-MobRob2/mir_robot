@@ -3,7 +3,7 @@
 <package format="3">
   <name>mir_msgs</name>
   <version>1.1.3</version>
-  <description>Message definitions for the MiR100 robot</description>
+  <description>Message definitions for the MiR robot</description>
 
   <maintainer email="martin.guenther@dfki.de">Martin Günther</maintainer>
   <author email="martin.guenther@dfki.de">Martin Günther</author>

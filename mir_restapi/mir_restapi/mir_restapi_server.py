@@ -85,29 +85,29 @@ class MirRestAPIServer(Node):
         return SetParametersResult(successful=True)
 
     def create_services(self):
-        self.create_service(Trigger, 'mir_100_sync_time', self.sync_time_callback)
-        self.get_logger().info("Listening on 'mir_100_sync_time'")
+        self.create_service(Trigger, 'mir_sync_time', self.sync_time_callback)
+        self.get_logger().info("Listening on 'mir_sync_time'")
 
-        self.create_service(Trigger, 'mir_100_get_status', self.get_status_callback)
-        self.get_logger().info("Listening on 'mir_100_get_status'")
+        self.create_service(Trigger, 'mir_get_status', self.get_status_callback)
+        self.get_logger().info("Listening on 'mir_get_status'")
 
-        self.create_service(Trigger, 'mir_100_get_sounds', self.get_sounds_callback)
-        self.get_logger().info("Listening on 'mir_100_get_sounds'")
+        self.create_service(Trigger, 'mir_get_sounds', self.get_sounds_callback)
+        self.get_logger().info("Listening on 'mir_get_sounds'")
 
-        self.create_service(Trigger, 'mir_100_is_emergency_halt', self.is_emergency_halt_callback)
-        self.get_logger().info("Listening on 'mir_100_is_emergency_halt'")
+        self.create_service(Trigger, 'mir_is_emergency_halt', self.is_emergency_halt_callback)
+        self.get_logger().info("Listening on 'mir_is_emergency_halt'")
 
-        self.create_service(Trigger, 'mir_100_get_missions', self.get_missions_callback)
-        self.get_logger().info("Listening on 'mir_100_get_missions'")
+        self.create_service(Trigger, 'mir_get_missions', self.get_missions_callback)
+        self.get_logger().info("Listening on 'mir_get_missions'")
 
-        self.create_service(Trigger, 'mir_100_honk', self.honk_callback)
-        self.get_logger().info("Listening on 'mir_100_honk'")
+        self.create_service(Trigger, 'mir_honk', self.honk_callback)
+        self.get_logger().info("Listening on 'mir_honk'")
 
-        self.create_service(Trigger, 'mir_100_get_system_info', self.get_system_info_callback)
-        self.get_logger().info("Listening on 'mir_100_get_system_info'")
+        self.create_service(Trigger, 'mir_get_system_info', self.get_system_info_callback)
+        self.get_logger().info("Listening on 'mir_get_system_info'")
 
-        self.create_service(Trigger, 'mir_100_get_settings', self.get_settings_callback)
-        self.get_logger().info("Listening on 'mir_100_get_settings'")
+        self.create_service(Trigger, 'mir_get_settings', self.get_settings_callback)
+        self.get_logger().info("Listening on 'mir_get_settings'")
 
     def test_api_connection(self):
         if self.api_handle is None:

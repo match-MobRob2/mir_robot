@@ -515,7 +515,7 @@ class SubscriberWrapper(object):
         self.robot.publish('/' + self.topic_config.topic, msg_dict)
 
 
-class MiR100BridgeNode(Node):
+class MiRBridgeNode(Node):
     def __init__(self):
         super().__init__('mir_bridge')
 
@@ -606,7 +606,7 @@ class MiR100BridgeNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = MiR100BridgeNode()
+    node = MiRBridgeNode()
     rclpy.spin(node)
     rclpy.shutdown()
 

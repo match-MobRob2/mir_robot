@@ -353,7 +353,7 @@ the Mir's host.
 * Call the time sync service from terminal by invoking
 
     ```bash
-    ros2 service call /mir_100_sync_time std_srvs/Trigger
+    ros2 service call /mir_sync_time std_srvs/Trigger
     ```
 
 #### **After time sync**
