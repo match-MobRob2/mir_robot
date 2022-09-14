@@ -101,14 +101,6 @@ repos:
         language: system
         files: \.(c|cc|cxx|cpp|frag|glsl|h|hpp|hxx|ih|ispc|ipp|java|js|m|proto|vert)$
         args: [ "-fallback-style=none", "-i" ]
-      - id: catkin_lint
-        name: catkin_lint
-        description: Check package.xml and cmake files
-        entry: catkin_lint .
-        language: system
-        always_run: true
-        pass_filenames: false
-        args: [ "--strict", "--skip-pkg", "mobipick_moveit_config" ]   # have to skip this package because of the missing warehouse_ros_mongo dependency
       - id: ament-copyright
         name: ament-copyright
         description: Check for copyright headers
