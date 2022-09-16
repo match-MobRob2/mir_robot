@@ -15,7 +15,7 @@ The following packages have been migrated to galactic:
 - [x] mir_gazebo
 - [x] mir_msgs
 - [x] mir_navigation
-- [ ] sdc21x0
+- [x] sdc21x0
 
 This repo contains a ROS driver and ROS configuration files (URDF description,
 Gazebo launch files, move_base config, bringup launch files, message and action
