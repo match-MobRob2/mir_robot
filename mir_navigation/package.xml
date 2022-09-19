@@ -8,6 +8,7 @@
   <author email="martin.guenther@dfki.de">Martin Günther</author>
 
   <license>BSD</license>
+  <license>Apache 2.0</license>
 
   <url type="website">https://github.com/dfki-ric/mir_robot</url>
   <url type="repository">https://github.com/dfki-ric/mir_robot</url>

@@ -6,7 +6,7 @@ package_name = 'mir_driver'
 
 setup(
     name=package_name,
-    version='0.0.0',
+    version='1.1.3',
     packages=[package_name],
     data_files=[
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
@@ -15,10 +15,10 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='TODO',
-    maintainer_email='TODO',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    maintainer='Martin Günther',
+    maintainer_email='martin.guenther@dfki.de',
+    description='A reverse ROS2 bridge for the MiR robot',
+    license='BSD, Apache 2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
