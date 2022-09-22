@@ -4,7 +4,7 @@
   <arg name="gui" default="true" />
 
   <!-- load MiR URDF -->
-  <include file="$(find-pkg-share mir_description)/launch/upload_mir_urdf.launch" />
+  <include file="$(find-pkg-share mir_description)/launch/robot_state_publisher.launch" />
 
   <node if="$(var gui)"     name="joint_state_publisher" pkg="joint_state_publisher_gui" exec="joint_state_publisher_gui" />
   <node unless="$(var gui)" name="joint_state_publisher" pkg="joint_state_publisher"     exec="joint_state_publisher" />
