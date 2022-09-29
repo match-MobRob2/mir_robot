@@ -40,10 +40,12 @@ from collections.abc import Iterable
 
 import mir_driver.rosbridge
 from rclpy_message_converter import message_converter
-from geometry_msgs.msg import TwistStamped
-from nav_msgs.msg import Odometry
-from sensor_msgs.msg import LaserScan
-from tf2_msgs.msg import TFMessage
+
+import geometry_msgs.msg
+import nav_msgs.msg
+import sensor_msgs.msg
+import tf2_msgs.msg
+
 from std_srvs.srv import Trigger
 
 tf_prefix = ''
@@ -192,7 +194,9 @@ PUB_TOPICS = [
     # TopicConfig('active_mapping_guid', std_msgs.msg.String),
     # TopicConfig('amcl_pose', geometry_msgs.msg.PoseWithCovarianceStamped),
     # TopicConfig('b_raw_scan', sensor_msgs.msg.LaserScan),
-    TopicConfig('b_scan', LaserScan, dict_filter=_laser_scan_filter, qos_profile=qos_profile_sensor_data),
+    TopicConfig(
+        'b_scan', sensor_msgs.msg.LaserScan, dict_filter=_laser_scan_filter, qos_profile=qos_profile_sensor_data
+    ),
     # TopicConfig('camera_floor/background', sensor_msgs.msg.PointCloud2),
     # TopicConfig('camera_floor/depth/parameter_descriptions',
     #   dynamic_reconfigure.msg.ConfigDescription),
@@ -212,7 +216,9 @@ PUB_TOPICS = [
     # TopicConfig('diagnostics_agg', diagnostic_msgs.msg.DiagnosticArray),
     # TopicConfig('diagnostics_toplevel_state', diagnostic_msgs.msg.DiagnosticStatus),
     # TopicConfig('f_raw_scan', sensor_msgs.msg.LaserScan),
-    TopicConfig('f_scan', LaserScan, dict_filter=_laser_scan_filter, qos_profile=qos_profile_sensor_data),
+    TopicConfig(
+        'f_scan', sensor_msgs.msg.LaserScan, dict_filter=_laser_scan_filter, qos_profile=qos_profile_sensor_data
+    ),
     # TopicConfig('imu_data', sensor_msgs.msg.Imu),
     # TopicConfig('laser_back/driver/parameter_descriptions',
     #   dynamic_reconfigure.msg.ConfigDescription),
@@ -306,7 +312,7 @@ PUB_TOPICS = [
     # TopicConfig('move_base_node/traffic_costmap/unknown_space', nav_msgs.msg.GridCells),
     # TopicConfig('move_base_node/visualization_marker', visualization_msgs.msg.Marker),
     # TopicConfig('move_base_simple/visualization_marker', visualization_msgs.msg.Marker),
-    TopicConfig('odom', Odometry, dict_filter=_odom_dict_filter),
+    TopicConfig('odom', nav_msgs.msg.Odometry, dict_filter=_odom_dict_filter),
     # TopicConfig('odom_enc', nav_msgs.msg.Odometry),
     # TopicConfig('one_way_map', nav_msgs.msg.OccupancyGrid),
     # TopicConfig('param_update', std_msgs.msg.String),
@@ -325,7 +331,7 @@ PUB_TOPICS = [
     # TopicConfig('session_importer_node/info', mirSessionImporter.msg.SessionImportInfo),
     # TopicConfig('set_mc_PID', std_msgs.msg.Float64MultiArray),
     # let /tf be /tf if namespaced
-    TopicConfig('tf', TFMessage, dict_filter=_tf_dict_filter, topic_renamed='/tf'),
+    TopicConfig('tf', tf2_msgs.msg.TFMessage, dict_filter=_tf_dict_filter, topic_renamed='/tf'),
     # TopicConfig('/tf_static', tf2_msgs.msg.TFMessage, dict_filter=_tf_static_dict_filter,
     #             latch=True),
     # TopicConfig('traffic_map', nav_msgs.msg.OccupancyGrid),
@@ -341,7 +347,7 @@ PUB_TOPICS = [
 
 # topics we want to subscribe to from ROS (and publish to the MiR)
 SUB_TOPICS = [
-    TopicConfig('cmd_vel', TwistStamped, 'cmd_vel_stamped')
+    TopicConfig('cmd_vel', geometry_msgs.msg.TwistStamped, 'cmd_vel_stamped')
     # TopicConfig('initialpose', geometry_msgs.msg.PoseWithCovarianceStamped),
     # TopicConfig('light_cmd', std_msgs.msg.String),
     # TopicConfig('mir_cmd', std_msgs.msg.String),
