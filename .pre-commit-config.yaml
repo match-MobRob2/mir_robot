@@ -109,3 +109,10 @@ repos:
         always_run: true
         pass_filenames: false
         args: [ "--strict", "--skip-pkg", "mobipick_moveit_config" ]   # have to skip this package because of the missing warehouse_ros_mongo dependency
+      - id: ament-copyright
+        name: ament-copyright
+        description: Check for copyright headers
+        entry: ament_copyright
+        language: system
+        files: \.py$
+        exclude: setup\.py$
