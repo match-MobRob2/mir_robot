@@ -66,6 +66,25 @@ repos:
     hooks:
     - id: dockerfilelint
 
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.3.1
+    hooks:
+      - id: insert-license
+        files: \.py$
+        exclude: |
+          (?x)^(
+              .*setup\.py|
+              .*__init__\.py|
+              .*test_copyright\.py|
+              .*test_pep257\.py|
+              mir_driver/mir_driver/tf_remove_child_frames\.py|
+              mir_navigation/launch/include/amcl\.py|
+              mir_navigation/launch/include/navigation\.py
+          )$
+        args:
+          - --license-filepath
+          - LICENSE
+
   - repo: local
     hooks:
       - id: clang-format
