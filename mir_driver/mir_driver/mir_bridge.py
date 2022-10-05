@@ -41,10 +41,15 @@ from collections.abc import Iterable
 import mir_driver.rosbridge
 from rclpy_message_converter import message_converter
 
+import actionlib_msgs.msg
+import diagnostic_msgs.msg
 import geometry_msgs.msg
+import mir_msgs.msg
 import nav_msgs.msg
+import sdc21x0.msg
 import sensor_msgs.msg
 import tf2_msgs.msg
+import visualization_msgs.msg
 
 from std_srvs.srv import Trigger
 
@@ -67,10 +72,81 @@ class TopicConfig(object):
             self.qos_profile = qos_profile_system_default
 
 
+def _diagnostic_array_dict_filter(msg_dict, to_ros2):
+    filtered_msg_dict = copy.deepcopy(msg_dict)
+    filtered_msg_dict['header'] = _convert_ros_header(filtered_msg_dict['header'], to_ros2)
+    filtered_msg_dict['status'] = [
+        _diagnostic_status_dict_filter(status, to_ros2) for status in filtered_msg_dict['status']
+    ]
+    return filtered_msg_dict
+
+
+def _diagnostic_status_dict_filter(msg_dict, to_ros2):
+    filtered_msg_dict = copy.deepcopy(msg_dict)
+    print(filtered_msg_dict['level'] % 256)
+    filtered_msg_dict['level'] = bytes([filtered_msg_dict['level'] % 256])
+    return filtered_msg_dict
+
+
+def _goal_status_array_dict_filter(msg_dict, to_ros2):
+    filtered_msg_dict = copy.deepcopy(msg_dict)
+    filtered_msg_dict['header'] = _convert_ros_header(filtered_msg_dict['header'], to_ros2)
+    filtered_msg_dict['status_list'] = [
+        _goal_status_dict_filter(status, to_ros2) for status in filtered_msg_dict['status_list']
+    ]
+    return filtered_msg_dict
+
+
+def _goal_status_dict_filter(msg_dict, to_ros2):
+    filtered_msg_dict = copy.deepcopy(msg_dict)
+    filtered_msg_dict['goal_id']['stamp'] = _convert_ros_time(filtered_msg_dict['goal_id']['stamp'], to_ros2)
+    return filtered_msg_dict
+
+
+def _header_dict_filter(msg_dict, to_ros2):
+    filtered_msg_dict = copy.deepcopy(msg_dict)
+    filtered_msg_dict['header'] = _convert_ros_header(filtered_msg_dict['header'], to_ros2)
+    return filtered_msg_dict
+
+
+def _occupancy_grid_dict_filter(msg_dict, to_ros2):
+    filtered_msg_dict = copy.deepcopy(msg_dict)
+    filtered_msg_dict['header'] = _convert_ros_header(filtered_msg_dict['header'], to_ros2)
+    filtered_msg_dict['info'] = _map_meta_data_dict_filter(filtered_msg_dict['info'], to_ros2)
+    return filtered_msg_dict
+
+
+def _map_meta_data_dict_filter(msg_dict, to_ros2):
+    filtered_msg_dict = copy.deepcopy(msg_dict)
+    filtered_msg_dict['map_load_time'] = _convert_ros_time(filtered_msg_dict['map_load_time'], to_ros2)
+    return filtered_msg_dict
+
+
+def _marker_dict_filter(msg_dict, to_ros2):
+    filtered_msg_dict = copy.deepcopy(msg_dict)
+    filtered_msg_dict['header'] = _convert_ros_header(filtered_msg_dict['header'], to_ros2)
+    filtered_msg_dict['lifetime'] = _convert_ros_time(filtered_msg_dict['lifetime'], to_ros2)
+    return filtered_msg_dict
+
+
 def _odom_dict_filter(msg_dict, to_ros2):
     filtered_msg_dict = copy.deepcopy(msg_dict)
     filtered_msg_dict['header'] = _convert_ros_header(filtered_msg_dict['header'], to_ros2)
     filtered_msg_dict['child_frame_id'] = tf_prefix + filtered_msg_dict['child_frame_id'].strip('/')
+    return filtered_msg_dict
+
+
+def _robot_mode_dict_filter(msg_dict, to_ros2):
+    filtered_msg_dict = copy.deepcopy(msg_dict)
+    filtered_msg_dict['robot_mode'] = filtered_msg_dict.pop('robotMode')
+    filtered_msg_dict['robot_mode_string'] = filtered_msg_dict.pop('robotModeString')
+    return filtered_msg_dict
+
+
+def _robot_state_dict_filter(msg_dict, to_ros2):
+    filtered_msg_dict = copy.deepcopy(msg_dict)
+    filtered_msg_dict['robot_state'] = filtered_msg_dict.pop('robotState')
+    filtered_msg_dict['robot_state_string'] = filtered_msg_dict.pop('robotStateString')
     return filtered_msg_dict
 
 
@@ -80,20 +156,6 @@ def _tf_dict_filter(msg_dict, to_ros2):
     for transform in filtered_msg_dict['transforms']:
         transform['child_frame_id'] = tf_prefix + transform['child_frame_id'].strip('/')
         transform['header'] = _convert_ros_header(transform['header'], to_ros2)
-    return filtered_msg_dict
-
-
-def _laser_scan_filter(msg_dict, to_ros2):
-    filtered_msg_dict = copy.deepcopy(msg_dict)
-    filtered_msg_dict['header'] = _convert_ros_header(filtered_msg_dict['header'], to_ros2)
-    return filtered_msg_dict
-
-
-def _map_dict_filter(msg_dict, to_ros2):
-    filtered_msg_dict = copy.deepcopy(msg_dict)
-    filtered_msg_dict['header'] = _convert_ros_header(filtered_msg_dict['header'], to_ros2)
-    filtered_msg_dict['info']['map_load_time'] = _convert_ros_time(filtered_msg_dict['info']['map_load_time'], to_ros2)
-    print('called dict filter')
     return filtered_msg_dict
 
 
@@ -180,31 +242,35 @@ def _remove_tf_prefix_dict_filter(msg_dict):
 PUB_TOPICS = [
     # TopicConfig('LightCtrl/bms_data', mir_msgs.msg.BMSData),
     # TopicConfig('LightCtrl/charging_state', mir_msgs.msg.ChargingState),
-    # TopicConfig('LightCtrl/us_list', sensor_msgs.msg.Range),
+    TopicConfig('LightCtrl/us_list', sensor_msgs.msg.Range, dict_filter=_header_dict_filter),
     # TopicConfig('MC/battery_currents', mir_msgs.msg.BatteryCurrents),
     # TopicConfig('MC/battery_voltage', std_msgs.msg.Float64),
-    # TopicConfig('MC/currents', sdc21x0.msg.MotorCurrents),
+    TopicConfig('MC/currents', sdc21x0.msg.MotorCurrents),
     # TopicConfig('MC/encoders', sdc21x0.msg.StampedEncoders),
     # TopicConfig('MissionController/CheckArea/visualization_marker',
-    #   visualization_msgs.msg.Marker),
+    #   visualization_msgs.msg.Marker, dict_filter=_marker_dict_filter),
     # TopicConfig('MissionController/goal_position_guid', std_msgs.msg.String),
     # TopicConfig('MissionController/prompt_user', mir_msgs.msg.UserPrompt),
     # TopicConfig('SickPLC/parameter_descriptions', dynamic_reconfigure.msg.ConfigDescription),
     # TopicConfig('SickPLC/parameter_updates', dynamic_reconfigure.msg.Config),
     # TopicConfig('active_mapping_guid', std_msgs.msg.String),
     # TopicConfig('amcl_pose', geometry_msgs.msg.PoseWithCovarianceStamped),
-    # TopicConfig('b_raw_scan', sensor_msgs.msg.LaserScan),
     TopicConfig(
-        'b_scan', sensor_msgs.msg.LaserScan, dict_filter=_laser_scan_filter, qos_profile=qos_profile_sensor_data
+        'b_raw_scan', sensor_msgs.msg.LaserScan, dict_filter=_header_dict_filter, qos_profile=qos_profile_sensor_data
     ),
-    # TopicConfig('camera_floor/background', sensor_msgs.msg.PointCloud2),
+    TopicConfig(
+        'b_scan', sensor_msgs.msg.LaserScan, dict_filter=_header_dict_filter, qos_profile=qos_profile_sensor_data
+    ),
+    TopicConfig('camera_floor/background', sensor_msgs.msg.PointCloud2, dict_filter=_header_dict_filter),
     # TopicConfig('camera_floor/depth/parameter_descriptions',
     #   dynamic_reconfigure.msg.ConfigDescription),
     # TopicConfig('camera_floor/depth/parameter_updates', dynamic_reconfigure.msg.Config),
-    # TopicConfig('camera_floor/depth/points', sensor_msgs.msg.PointCloud2),
-    # TopicConfig('camera_floor/filter/visualization_marker', visualization_msgs.msg.Marker),
-    # TopicConfig('camera_floor/floor', sensor_msgs.msg.PointCloud2),
-    # TopicConfig('camera_floor/obstacles', sensor_msgs.msg.PointCloud2),
+    TopicConfig('camera_floor/depth/points', sensor_msgs.msg.PointCloud2, dict_filter=_header_dict_filter),
+    TopicConfig(
+        'camera_floor/filter/visualization_marker', visualization_msgs.msg.Marker, dict_filter=_marker_dict_filter
+    ),
+    TopicConfig('camera_floor/floor', sensor_msgs.msg.PointCloud2, dict_filter=_header_dict_filter),
+    TopicConfig('camera_floor/obstacles', sensor_msgs.msg.PointCloud2, dict_filter=_header_dict_filter),
     # TopicConfig('check_area/polygon', geometry_msgs.msg.PolygonStamped),
     # TopicConfig('check_pose_area/polygon', geometry_msgs.msg.PolygonStamped),
     # TopicConfig('data_events/area_events', mir_data_msgs.msg.AreaEventEvent),
@@ -212,14 +278,18 @@ PUB_TOPICS = [
     # TopicConfig('data_events/positions', mir_data_msgs.msg.PositionEvent),
     # TopicConfig('data_events/registers', mir_data_msgs.msg.PLCRegisterEvent),
     # TopicConfig('data_events/sounds', mir_data_msgs.msg.SoundEvent),
-    # TopicConfig('diagnostics', diagnostic_msgs.msg.DiagnosticArray),
-    # TopicConfig('diagnostics_agg', diagnostic_msgs.msg.DiagnosticArray),
-    # TopicConfig('diagnostics_toplevel_state', diagnostic_msgs.msg.DiagnosticStatus),
-    # TopicConfig('f_raw_scan', sensor_msgs.msg.LaserScan),
+    TopicConfig('diagnostics', diagnostic_msgs.msg.DiagnosticArray, dict_filter=_diagnostic_array_dict_filter),
+    TopicConfig('diagnostics_agg', diagnostic_msgs.msg.DiagnosticArray, dict_filter=_diagnostic_array_dict_filter),
     TopicConfig(
-        'f_scan', sensor_msgs.msg.LaserScan, dict_filter=_laser_scan_filter, qos_profile=qos_profile_sensor_data
+        'diagnostics_toplevel_state', diagnostic_msgs.msg.DiagnosticStatus, dict_filter=_diagnostic_status_dict_filter
     ),
-    # TopicConfig('imu_data', sensor_msgs.msg.Imu),
+    TopicConfig(
+        'f_raw_scan', sensor_msgs.msg.LaserScan, dict_filter=_header_dict_filter, qos_profile=qos_profile_sensor_data
+    ),
+    TopicConfig(
+        'f_scan', sensor_msgs.msg.LaserScan, dict_filter=_header_dict_filter, qos_profile=qos_profile_sensor_data
+    ),
+    TopicConfig('imu_data', sensor_msgs.msg.Imu, dict_filter=_header_dict_filter),
     # TopicConfig('laser_back/driver/parameter_descriptions',
     #   dynamic_reconfigure.msg.ConfigDescription),
     # TopicConfig('laser_back/driver/parameter_updates', dynamic_reconfigure.msg.Config),
@@ -227,8 +297,8 @@ PUB_TOPICS = [
     #   dynamic_reconfigure.msg.ConfigDescription),
     # TopicConfig('laser_front/driver/parameter_updates', dynamic_reconfigure.msg.Config),
     # TopicConfig('localization_score', std_msgs.msg.Float64),
-    # TopicConfig('/map', nav_msgs.msg.OccupancyGrid, latch=True),
-    # TopicConfig('/map_metadata', nav_msgs.msg.MapMetaData),
+    TopicConfig('/map', nav_msgs.msg.OccupancyGrid, dict_filter=_occupancy_grid_dict_filter, latch=True),
+    TopicConfig('/map_metadata', nav_msgs.msg.MapMetaData, dict_filter=_map_meta_data_dict_filter),
     # TopicConfig('marker_tracking_node/feedback',
     #   mir_marker_tracking.msg.MarkerTrackingActionFeedback),
     # TopicConfig('marker_tracking_node/laser_line_extract/parameter_descriptions',
@@ -236,14 +306,14 @@ PUB_TOPICS = [
     # TopicConfig('marker_tracking_node/laser_line_extract/parameter_updates',
     #   dynamic_reconfigure.msg.Config),
     # TopicConfig('marker_tracking_node/laser_line_extract/visualization_marker',
-    #   visualization_msgs.msg.Marker),
+    #   visualization_msgs.msg.Marker, dict_filter=_marker_dict_filter),
     # TopicConfig('marker_tracking_node/result',
     #   mir_marker_tracking.msg.MarkerTrackingActionResult),
     # TopicConfig('marker_tracking_node/status', actionlib_msgs.msg.GoalStatusArray),
     # TopicConfig('mirEventTrigger/events', mir_msgs.msg.Events),
     # TopicConfig('mir_amcl/parameter_descriptions', dynamic_reconfigure.msg.ConfigDescription),
     # TopicConfig('mir_amcl/parameter_updates', dynamic_reconfigure.msg.Config),
-    # TopicConfig('mir_amcl/selected_points', sensor_msgs.msg.PointCloud2),
+    # TopicConfig('mir_amcl/selected_points', sensor_msgs.msg.PointCloud2, dict_filter=_header_dict_filter),
     # TopicConfig('mir_log', rosgraph_msgs.msg.Log),
     # TopicConfig('mir_sound/sound_event', mir_msgs.msg.SoundEvent),
     # TopicConfig('mir_status_msg', std_msgs.msg.String),
@@ -257,8 +327,9 @@ PUB_TOPICS = [
     # really mir_actions/MirMoveBaseActionResult:
     # TopicConfig('move_base/result', move_base_msgs.msg.MoveBaseActionResult,
     #   dict_filter=_move_base_result_dict_filter),
-    # TopicConfig('move_base/status', actionlib_msgs.msg.GoalStatusArray),
-    # TopicConfig('move_base_node/MIRPlannerROS/cost_cloud', sensor_msgs.msg.PointCloud2),
+    TopicConfig('move_base/status', actionlib_msgs.msg.GoalStatusArray, dict_filter=_goal_status_array_dict_filter),
+    # TopicConfig('move_base_node/MIRPlannerROS/cost_cloud', sensor_msgs.msg.PointCloud2,
+    #             dict_filter=_header_dict_filter),
     # TopicConfig('move_base_node/MIRPlannerROS/global_plan', nav_msgs.msg.Path),
     # TopicConfig('move_base_node/MIRPlannerROS/len_to_goal', std_msgs.msg.Float64),
     # TopicConfig('move_base_node/MIRPlannerROS/local_plan', nav_msgs.msg.Path),
@@ -296,7 +367,7 @@ PUB_TOPICS = [
     # TopicConfig('move_base_node/local_costmap/safety_zone', geometry_msgs.msg.PolygonStamped),
     # TopicConfig('move_base_node/local_costmap/unknown_space', nav_msgs.msg.GridCells),
     # TopicConfig('move_base_node/mir_escape_recovery/visualization_marker',
-    #   visualization_msgs.msg.Marker),
+    #   visualization_msgs.msg.Marker, dict_filter=_marker_dict_filter),
     # TopicConfig('move_base_node/parameter_descriptions',
     #   dynamic_reconfigure.msg.ConfigDescription),
     # TopicConfig('move_base_node/parameter_updates', dynamic_reconfigure.msg.Config),
@@ -310,30 +381,35 @@ PUB_TOPICS = [
     # TopicConfig('move_base_node/traffic_costmap/robot_footprint',
     #   geometry_msgs.msg.PolygonStamped),
     # TopicConfig('move_base_node/traffic_costmap/unknown_space', nav_msgs.msg.GridCells),
-    # TopicConfig('move_base_node/visualization_marker', visualization_msgs.msg.Marker),
-    # TopicConfig('move_base_simple/visualization_marker', visualization_msgs.msg.Marker),
+    # TopicConfig('move_base_node/visualization_marker', visualization_msgs.msg.Marker,
+    #             dict_filter=_marker_dict_filter),
+    # TopicConfig('move_base_simple/visualization_marker', visualization_msgs.msg.Marker,
+    #             dict_filter=_marker_dict_filter),
     TopicConfig('odom', nav_msgs.msg.Odometry, dict_filter=_odom_dict_filter),
-    # TopicConfig('odom_enc', nav_msgs.msg.Odometry),
+    TopicConfig('odom_enc', nav_msgs.msg.Odometry, dict_filter=_odom_dict_filter),
     # TopicConfig('one_way_map', nav_msgs.msg.OccupancyGrid),
     # TopicConfig('param_update', std_msgs.msg.String),
     # TopicConfig('particlevizmarker', visualization_msgs.msg.MarkerArray),
     # TopicConfig('resource_tracker/needed_resources', mir_msgs.msg.ResourcesState),
-    # TopicConfig('robot_mode', mir_msgs.msg.RobotMode),
-    # TopicConfig('robot_pose', geometry_msgs.msg.Pose),
-    # TopicConfig('robot_state', mir_msgs.msg.RobotState),
+    TopicConfig('robot_mode', mir_msgs.msg.RobotMode, dict_filter=_robot_mode_dict_filter),
+    TopicConfig('robot_pose', geometry_msgs.msg.Pose),
+    TopicConfig('robot_state', mir_msgs.msg.RobotState, dict_filter=_robot_state_dict_filter),
     # TopicConfig('robot_status', mir_msgs.msg.RobotStatus),
     # TopicConfig('/rosout', rosgraph_msgs.msg.Log),
     # TopicConfig('/rosout_agg', rosgraph_msgs.msg.Log),
-    # TopicConfig('scan', sensor_msgs.msg.LaserScan),
+    TopicConfig(
+        'scan', sensor_msgs.msg.LaserScan, dict_filter=_header_dict_filter, qos_profile=qos_profile_sensor_data
+    ),
     # TopicConfig('scan_filter/parameter_descriptions', dynamic_reconfigure.msg.ConfigDescription),
     # TopicConfig('scan_filter/parameter_updates', dynamic_reconfigure.msg.Config),
-    # TopicConfig('scan_filter/visualization_marker', visualization_msgs.msg.Marker),
+    TopicConfig('scan_filter/visualization_marker', visualization_msgs.msg.Marker, dict_filter=_marker_dict_filter),
     # TopicConfig('session_importer_node/info', mirSessionImporter.msg.SessionImportInfo),
     # TopicConfig('set_mc_PID', std_msgs.msg.Float64MultiArray),
     # let /tf be /tf if namespaced
     TopicConfig('tf', tf2_msgs.msg.TFMessage, dict_filter=_tf_dict_filter, topic_renamed='/tf'),
-    # TopicConfig('/tf_static', tf2_msgs.msg.TFMessage, dict_filter=_tf_static_dict_filter,
-    #             latch=True),
+    TopicConfig(
+        '/tf_static', tf2_msgs.msg.TFMessage, dict_filter=_tf_dict_filter, latch=True  # TODO: _tf_static_dict_filter
+    ),
     # TopicConfig('traffic_map', nav_msgs.msg.OccupancyGrid),
     # TopicConfig('wifi_diagnostics', diagnostic_msgs.msg.DiagnosticArray),
     # TopicConfig('wifi_diagnostics/cur_ap', mir_wifi_msgs.msg.APInfo),
