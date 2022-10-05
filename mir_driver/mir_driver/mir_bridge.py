@@ -31,7 +31,13 @@
 
 import rclpy
 from rclpy.node import Node
-from rclpy.qos import qos_profile_system_default, qos_profile_sensor_data
+from rclpy.qos import (
+    qos_profile_system_default,
+    qos_profile_sensor_data,
+    QoSProfile,
+    QoSDurabilityPolicy,
+    QoSReliabilityPolicy,
+)
 
 import time
 import copy
@@ -55,16 +61,21 @@ from std_srvs.srv import Trigger
 
 tf_prefix = ''
 
+qos_profile_latching = QoSProfile(
+    depth=1,
+    durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
+    reliability=QoSReliabilityPolicy.RELIABLE,
+)
+
 
 class TopicConfig(object):
-    def __init__(self, topic, topic_type, topic_renamed=None, latch=False, dict_filter=None, qos_profile=None):
+    def __init__(self, topic, topic_type, topic_renamed=None, dict_filter=None, qos_profile=None):
         self.topic = topic
         if topic_renamed:
             self.topic_ros2_name = topic_renamed
         else:
             self.topic_ros2_name = topic
         self.topic_type = topic_type
-        self.latch = latch
         self.dict_filter = dict_filter
         if qos_profile is not None:
             self.qos_profile = qos_profile
@@ -297,7 +308,9 @@ PUB_TOPICS = [
     #   dynamic_reconfigure.msg.ConfigDescription),
     # TopicConfig('laser_front/driver/parameter_updates', dynamic_reconfigure.msg.Config),
     # TopicConfig('localization_score', std_msgs.msg.Float64),
-    TopicConfig('/map', nav_msgs.msg.OccupancyGrid, dict_filter=_occupancy_grid_dict_filter, latch=True),
+    TopicConfig(
+        '/map', nav_msgs.msg.OccupancyGrid, dict_filter=_occupancy_grid_dict_filter, qos_profile=qos_profile_latching
+    ),
     TopicConfig('/map_metadata', nav_msgs.msg.MapMetaData, dict_filter=_map_meta_data_dict_filter),
     # TopicConfig('marker_tracking_node/feedback',
     #   mir_marker_tracking.msg.MarkerTrackingActionFeedback),
@@ -408,7 +421,10 @@ PUB_TOPICS = [
     # let /tf be /tf if namespaced
     TopicConfig('tf', tf2_msgs.msg.TFMessage, dict_filter=_tf_dict_filter, topic_renamed='/tf'),
     TopicConfig(
-        '/tf_static', tf2_msgs.msg.TFMessage, dict_filter=_tf_dict_filter, latch=True  # TODO: _tf_static_dict_filter
+        '/tf_static',
+        tf2_msgs.msg.TFMessage,
+        dict_filter=_tf_dict_filter,
+        qos_profile=qos_profile_latching,  # TODO: _tf_static_dict_filter
     ),
     # TopicConfig('traffic_map', nav_msgs.msg.OccupancyGrid),
     # TopicConfig('wifi_diagnostics', diagnostic_msgs.msg.DiagnosticArray),
@@ -453,7 +469,7 @@ class PublisherWrapper(object):
             "Publishing topic '%s' [%s]" % (topic_config.topic_ros2_name, topic_config.topic_type.__module__)
         )
         # latched topics must be subscribed immediately
-        # if topic_config.latch:
+        # if topic_config.qos_profile == qos_profile_latching:
         self.peer_subscribe(None, None, None, nh)
 
     def peer_subscribe(self, topic_name, topic_publish, peer_publish, nh):
