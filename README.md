@@ -9,7 +9,7 @@ galactic](https://docs.ros.org/en/galactic/Installation.html).
 It is currently still under heavy development - to be used with caution!**
 The following packages have been migrated to galactic:
 
-- [ ] mir_actions
+- [x] mir_actions
 - [x] mir_description
 - [x] mir_driver
 - [x] mir_gazebo
