@@ -115,7 +115,7 @@ def generate_launch_description():
             ),
             Node(
                 package='nav2_behaviors',
-                executable='recoveries_server',
+                executable='behavior_server',
                 name='recoveries_server',
                 output='screen',
                 parameters=[configured_params],
