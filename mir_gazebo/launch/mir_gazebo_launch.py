@@ -151,6 +151,13 @@ def generate_launch_description():
         prefix='xterm -e',
     )
 
+    static_tf = Node(
+            package="tf2_ros",
+            executable="static_transform_publisher",
+            output="screen" ,
+            arguments=["0", "0", "0", "0", "0", "0", "map", "base_link"]
+        )
+
     ld.add_action(OpaqueFunction(function=process_namespace))
     ld.add_action(declare_namespace_arg)
     ld.add_action(declare_robot_x_arg)
@@ -165,10 +172,11 @@ def generate_launch_description():
     ld.add_action(declare_gui_arg)
 
     ld.add_action(launch_gazebo_world)
-    ld.add_action(launch_mir_description)
-    ld.add_action(launch_mir_gazebo_common)
-    ld.add_action(spawn_robot)
+    # ld.add_action(launch_mir_description)
+    # ld.add_action(launch_mir_gazebo_common)
+    # ld.add_action(spawn_robot)
+    ld.add_action(static_tf)
     ld.add_action(launch_rviz)
-    ld.add_action(launch_teleop)
+    # ld.add_action(launch_teleop)
 
     return ld

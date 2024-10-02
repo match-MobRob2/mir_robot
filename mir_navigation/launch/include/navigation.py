@@ -34,7 +34,7 @@ def generate_launch_description():
     default_nav_to_pose_bt_xml = LaunchConfiguration('default_nav_to_pose_bt_xml')
     map_subscribe_transient_local = LaunchConfiguration('map_subscribe_transient_local')
 
-    lifecycle_nodes = ['controller_server', 'planner_server', 'recoveries_server', 'bt_navigator', 'waypoint_follower']
+    lifecycle_nodes = [ 'planner_server' ] #'controller_server', 'recoveries_server', 'bt_navigator', 'waypoint_follower'
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
     # In case of the transforms (tf), currently, there doesn't seem to be a better alternative
@@ -98,45 +98,46 @@ def generate_launch_description():
                 description='Whether to set the map subscriber QoS to transient local',
             ),
             OpaqueFunction(function=add_prefix_to_cmd_vel),
-            Node(
-                package='nav2_controller',
-                executable='controller_server',
-                output='screen',
-                parameters=[configured_params],
-                remappings=remappings,
-            ),
+            # Node(
+            #     package='nav2_controller',
+            #     executable='controller_server',
+            #     output='screen',
+            #     parameters=[configured_params],
+            #     remappings=remappings,
+            # ),
             Node(
                 package='nav2_planner',
                 executable='planner_server',
                 name='planner_server',
                 output='screen',
                 parameters=[configured_params],
+                arguments=['--ros-args', '--log-level', 'planner_server:=debug'],
                 remappings=remappings,
             ),
-            Node(
-                package='nav2_behaviors',
-                executable='behavior_server',
-                name='recoveries_server',
-                output='screen',
-                parameters=[configured_params],
-                remappings=remappings,
-            ),
-            Node(
-                package='nav2_bt_navigator',
-                executable='bt_navigator',
-                name='bt_navigator',
-                output='screen',
-                parameters=[configured_params, {'default_nav_to_pose_bt_xml': default_nav_to_pose_bt_xml}],
-                remappings=remappings,
-            ),
-            Node(
-                package='nav2_waypoint_follower',
-                executable='waypoint_follower',
-                name='waypoint_follower',
-                output='screen',
-                parameters=[configured_params],
-                remappings=remappings,
-            ),
+            # Node(
+            #     package='nav2_behaviors',
+            #     executable='behavior_server',
+            #     name='recoveries_server',
+            #     output='screen',
+            #     parameters=[configured_params],
+            #     remappings=remappings,
+            # ),
+            # Node(
+            #     package='nav2_bt_navigator',
+            #     executable='bt_navigator',
+            #     name='bt_navigator',
+            #     output='screen',
+            #     parameters=[configured_params, {'default_nav_to_pose_bt_xml': default_nav_to_pose_bt_xml}],
+            #     remappings=remappings,
+            # ),
+            # Node(
+            #     package='nav2_waypoint_follower',
+            #     executable='waypoint_follower',
+            #     name='waypoint_follower',
+            #     output='screen',
+            #     parameters=[configured_params],
+            #     remappings=remappings,
+            # ),
             Node(
                 package='nav2_lifecycle_manager',
                 executable='lifecycle_manager',
